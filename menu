@@ -1,0 +1,219 @@
+#!/bin/bash
+
+	listagem_arquivos() {
+		
+                 # Mudar para o diretório onde estão os scripts
+                 cd  ~/MeusScripts
+                
+                 # Lista os scripts do diretório
+                 echo "Scripts disponíveis:"
+                 ls
+                
+                 # Solicita para usuário que escolha um arquivo ou saia
+                 echo "Escolha qual script deseja (Q para sair):"
+                 read script
+                 echo""
+                          
+                            # Verifica se o usuário escolheu 'q' ou 'Q' para sair 
+                            if [ "$script" == q ] || [ "$script" == Q ]; then
+                                echo "Voltando para menu principal..."
+                                sleep 1
+
+                                # Chama a função menu_script
+                                menu_script
+                            fi 
+    
+			}
+
+
+
+	menu_criacao() {
+
+                 # loop infinito para manter menu ativo até usuário tomar uma decisão
+	         while true; do
+
+                 # Exibe as opções do menu 
+                 echo "1) Criar Script."  
+                 echo "2) Encerrar menu e sair."
+                 echo "3) Voltar para menu principal."
+
+                 # Lê a escolha do usuário
+                 read escolha
+
+                 # Estrutura case para tratar cada opção do menu
+	         case $escolha in
+
+			1)
+                         
+                         # Criar um novo arquivo
+                         echo "Qual nome do script que deseja criar?"
+                         read nomescript
+                         
+                            # Verifica se já existe um arquivo com o nome fornecido
+                            if find . -iname "$nomescript" | grep -q .; then 
+                                echo "Já existe um arquivo com esse nome."
+
+                            else
+                            
+                            # Verifica se o arquivo fornecido possui a extensão .sh
+                            if [[ "$nomescript" == *.sh ]]; then
+                               vi $nomescript   # Abre o editor 'vi' para criar o script 
+                               chmod +x $nomescript  # Torna o script executável 
+
+                               # Confirma que o arquivo foi criado
+                               echo "arquivo criado com sucesso!"                               
+                               sleep 1
+
+                            else
+
+                               # Exibe uma mensagem caso o arquivo não tenha a extensão .sh, e reinicia o loop 
+                               echo "O arquivo não tem a extensão .sh"
+                               continue
+                            fi
+                           fi
+                         ;;
+
+                        2)
+                         
+                         # Encerra o menu
+                         echo "Saindo..."
+                         sleep 1
+                         exit
+                        ;; 
+  
+			3)
+                           
+                         # Chamada de função para voltar para o menu principal
+                         menu_script
+                    
+                          ;;
+                      esac
+                   done
+			
+			}
+                  
+   
+	criar_script() {
+                
+                # Solicita ao usuário o nome do script a ser criado 
+		echo "Qual nome do script que deseja criar?"
+                read nomescript
+                            
+                            # Verifica se já existe um script com o mesmo nome 
+                            if find . -iname "$nomescript" | grep -q .; then
+                                echo "Já existe um script com esse nome."
+                                      menu_criacao   # Retornar ao menu verificação
+                                echo ""
+
+                            else
+                            
+                            # Verifica se o script tem a extenção .sh
+                            if [[ "$nomescript" == *.sh ]]; then
+                               vi $nomescript # Abre o editor 'vi' para criar o script 
+                               chmod +x $nomescript   # Torna o script executável
+                                      menu_criacao  # Retorna ao menu verificação
+                               echo ""
+
+                            else
+                               # Mensagem de erro para scripts sem extenção .sh
+                               echo "O arquivo não tem a extensão .sh"
+                                       menu_criacao  # Retorna ao menu verificação
+                               echo ""
+
+                            fi
+                           fi
+			}
+
+
+menu_script() {
+
+# Limpa a tela ao iniciar o menu
+clear 
+       
+        # Loop para manter menu ativo
+	while true; do
+	echo "Escolha uma opção:"
+	echo "1) Listar e Executar scripts."
+	echo "2) Ver código de Scripts e editar."
+	echo "3) Criar um novo script."
+        echo "4) Excluir script"
+	echo "5) Sair."
+	read -p "Digite a opção desejada:" opcao
+        echo ""
+	
+		case $opcao in
+
+			1)
+                         
+                         # Chama a função para listar os scripts para a execução
+                         listagem_arquivos
+
+                         # Busca o script informado pelo usuário, se encontrado armazena na variável resultado  
+                         resultado=$(find . -iname "$script" -print -quit)
+
+                            # Verifica se o comando 'find' retornou vazio 
+                            if [ -z "$resultado" ]; then
+                                echo "Arquivo não encontrado"  # Exibe a mensagem caso não encontre o arquivo
+                                echo ""
+                            else
+                                ./"$resultado"  # Se o arquivo for econtrado é executado 
+                                echo ""
+                           fi
+
+			;;
+
+			2)
+                         
+                         # Chama a função para listar os scripts para ver o código e editar 
+                         listagem_arquivos
+
+                         # Busca o script informado pelo usuário, se econtrado armazena na variável resultado
+                         resultado=$(find . -iname "$script" -print -quit)
+                            
+                            # Verifica se o comando 'find' retornou vazio
+                            if [ -z "$resultado" ]; then
+                                echo "Arquivo não encontrado"  # Exibe a mensagem caso não encontre o arquivo
+                                echo ""
+
+                            else
+                                vi "$resultado"  # Se o arquivo for encontrado é aberto com editor 'vi'
+                                echo ""
+                           fi
+
+			;;
+
+			3)
+                         
+                         # Chama a função para criar um novo script
+                         criar_script
+                         echo ""
+			;;  
+                        
+                        4)
+                         
+                         # Chama a função para listar os scripts para excluir 
+                         listagem_arquivos                         
+                         
+                         # Exibe a mensagem com o nome do script que deseja excluir 
+                         echo "O arquivo $script será excluido." 
+                         rm -r $script  # Remove o script desejado
+                         sleep 1
+
+                         # Exibe a mensagem para confirmar que script foi excluído 
+                         echo "Arquivo excluido com sucesso."
+                         echo ""
+                        ;;
+
+                        5)
+                         
+                         # Para encerrar e sair do menu
+                         echo "Saindo..."
+                         sleep 1
+                         exit 
+                        ;;
+                    esac
+                done 
+     
+			}
+
+	menu_script  # Chama a função para iniciar o menu
